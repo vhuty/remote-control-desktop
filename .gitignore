@@ -1,0 +1,18 @@
+#ide
+/.vscode
+/.idea
+
+#modules
+/node_modules
+package-lock.json
+
+#build
+/build
+
+#config and temp
+.env
+
+#logs
+*.log
+
+#static

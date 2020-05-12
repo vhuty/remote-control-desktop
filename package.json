@@ -1,0 +1,24 @@
+{
+  "name": "rc-desk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/main/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^8.2.5",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "ejs": "^3.1.2",
+    "menubar": "^8.0.2",
+    "node-machine-id": "^1.1.12",
+    "qrcode": "^1.4.4",
+    "robotjs": "^0.6.0",
+    "simple-peer": "^9.7.0"
+  }
+}
