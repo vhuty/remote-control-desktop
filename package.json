@@ -1,17 +1,35 @@
 {
-  "name": "rc-desk",
+  "name": "RemoteControl",
   "version": "1.0.0",
-  "description": "",
+  "author": "Vladislav Hutych <mandarineye@gmail.com>",
+  "license": "ISC",
+  "description": "Desktop part of the RemoteControl project",
+  "homepage": "https://github.com/DixByFIJI/remote-control-desktop",
   "main": "./src/main/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder -l -w",
+    "dist-debug": "DEBUG=electron-builder electron-builder"
   },
-  "author": "",
-  "license": "ISC",
+  "build": {
+    "appId": "com.electron.rcdesk",
+    "productName": "RemoteControl",
+    "nodeGypRebuild": true,
+    "linux": {
+      "target": [
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "build/icon.png"
+    }
+  },
   "devDependencies": {
-    "electron": "^8.2.5",
-    "typescript": "^3.8.3"
+    "electron": "^8.3.0",
+    "electron-builder": "^22.6.1"
   },
   "dependencies": {
     "ejs": "^3.1.2",

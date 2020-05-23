@@ -16,6 +16,19 @@ this.app = new Vue({
     onLine: navigator.onLine
   },
   methods: {
+    // For the testing purposes
+    async execute(command) {
+      const { error, payload } = await this.$ipc.invoke(
+        'execute:command',
+        { command }
+      );
+
+      if(error) {
+        return console.error(error);
+      }
+      
+      console.log(payload);
+    },
     async listen() {
       const { error, key, connection } = await this.$api.listen();
 
@@ -130,6 +143,14 @@ this.app = new Vue({
         this.peer.destroy();
       }
     },
+    async copyAccessKey() {
+      try {
+        await navigator.clipboard.writeText(this.key);
+      } catch (err) {
+        // Use dialog
+        alert(error);
+      }
+    }
   },
   async created() {
     if (!localStorage.registered) {

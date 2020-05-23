@@ -1,9 +1,11 @@
 const { shell } = require('electron');
 const robot = require('robotjs');
-// import screenshot from 'screenshot-desktop';
-// import Tesseract from 'tesseract.js';
 const { exec } = require('child_process');
 const { promisify } = require('util');
+const fsp = require('fs').promises;
+const os = require('os');
+const path = require('path');
+
 const device = require('./device');
 
 const execPromise = promisify(exec);
@@ -31,38 +33,33 @@ const SYSTEM_CALLS = {
 
 class Executor {
   commands = [
-    // {
-    //   pattern: /^screen (?<target>.+)$/i,
-    //   action: async ({ matcher }) => {
-    //     // const midx = 653 - 565 / 2;
-    //     // const midy = 61 - 31 / 2;
-    //     // robot.moveMouse(565, 31);
-    //     const {
-    //       groups: { target },
-    //     } = matcher;
-    //     const buffer = await screenshot({ filename: 'shot.jpg' });
-    //     // const buffer = await screenshot();
-    //     console.time('tes');
-    //     const {
-    //       data: { words },
-    //     } = await Tesseract.recognize(buffer, 'eng');
-    //     console.timeEnd('tes');
-    //     const word = words.find(({ text }) => text === target);
-    //     if (word) {
-    //       const { bbox } = word;
-    //       const axisXMiddle = ~~((bbox.x1 - bbox.x0) / 2);
-    //       const axisX = bbox.x0 + axisXMiddle;
-    //       const axisYMiddle = ~~((bbox.y1 - bbox.y0) / 2);
-    //       const axisY = bbox.y0 + axisYMiddle;
-    //       robot.moveMouse(axisX, axisY);
-    //     }
-    //   },
-    // },
+    {
+      /* Save note as text file */
+      pattern: /(?<content>.+) save note(?<alias> as (?<name>.+))?$/i,
+      action: async ({ matcher }) => {
+        const {
+          groups: { content, alias, name },
+        } = matcher;
+
+        const filename = alias
+          ? `${name}.txt`
+          : `Note for ${new Date().toDateString()}.txt`;
+
+        /* Default path to storing notes - Desktop directory */
+        const filepath = path.join(os.homedir(), 'Desktop', filename);
+
+        await fsp.writeFile(filepath, content);
+
+        return {
+          payload: `"${filename}" has been saved`,
+        };
+      },
+    },
     {
       pattern: /^browse (.+)$/i,
       action: async ({ matcher }) => {
         const [, resource] = matcher;
-        await shell.openExternal(`https://${resource}/`);
+        await shell.openExternal(`https://${resource}`);
 
         return {
           payload: 'Browsing resource...',
@@ -70,6 +67,20 @@ class Executor {
       },
     },
     {
+      /* Make google search request */
+      pattern: /^google (?<request>.+)$/i,
+      action: async ({ matcher }) => {
+        const { request } = matcher.groups;
+        
+        await shell.openExternal(`https://www.google.com/search?q=${request}`);
+
+        return {
+          payload: `"Googling": ${request}...`,
+        };
+      }
+    },
+    {
+      /* Type string on the keyboard */
       pattern: /^type (.+)$/i,
       action: async ({ matcher }) => {
         const [, text] = matcher;
@@ -100,13 +111,25 @@ class Executor {
       },
     },
     {
-      /* Log out */
-      pattern: /^log ?out$/i,
+      pattern: /^toggle$/i,
       action: () => {
-        robot.keyTap('l', 'command');
+        robot.keyTap('d', 'command');
 
-        return { payload: 'Logging out...' };
-      },
+        return {
+          payload: 'Hiding...'
+        };
+      }
+    },
+    {
+      /* Switch between opened windows */
+      pattern: /^switch$/i,
+      action: () => {
+        robot.keyTap('tab', 'command');
+
+        return {
+          payload: 'Switching...'
+        };
+      }
     },
     {
       pattern: /^mute$/i,
@@ -132,6 +155,15 @@ class Executor {
             return {};
           }
         }
+      },
+    },
+    {
+      /* Log out */
+      pattern: /^log ?out$/i,
+      action: () => {
+        robot.keyTap('l', 'command');
+
+        return { payload: 'Logging out...' };
       },
     },
     {
@@ -167,8 +199,6 @@ class Executor {
       },
     },
   ];
-
-  constructor() {}
 
   async validate(body) {
     const command = this.commands.find((cmd) => {

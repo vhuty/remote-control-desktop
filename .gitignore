@@ -1,18 +1,19 @@
-#ide
+# ide
 /.vscode
 /.idea
 
-#modules
+# modules
 /node_modules
 package-lock.json
 
-#build
+# build
 /build
+/dist
 
-#config and temp
+# config and temp
 .env
 
-#logs
+# logs
 *.log
 
-#static
+# static
