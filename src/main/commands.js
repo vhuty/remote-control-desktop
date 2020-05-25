@@ -134,11 +134,15 @@ class Executor {
     {
       pattern: /^mute$/i,
       action: async ({ platform }) => {
-        const result = { payload: 'Muting' };
+        const result = { payload: 'Muting...' };
 
         switch (platform) {
           case PLATFORMS.LINUX: {
-            await execPromise('amixer -q -D pulse sset Master toggle');
+            try {
+              await execPromise('amixer -q -D pulse sset Master toggle');
+            } catch (err) {
+              console.error(err);
+            }
 
             return result;
           }
@@ -172,7 +176,7 @@ class Executor {
       },
     },
     {
-      pattern: /^(?<action>(turn off|reboot|cancel))(\s*in\s+(?<timeout>\d)\s+minutes)?$/,
+      pattern: /^(?<action>turn off|reboot|cancel)(\s+in\s+(?<timeout>\d+)\s+minutes)?$/,
       action: async ({ matcher, platform }) => {
         const {
           groups: {
