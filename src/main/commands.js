@@ -1,4 +1,4 @@
-const { shell } = require('electron');
+const { shell, app } = require('electron');
 const robot = require('robotjs');
 const { exec } = require('child_process');
 const { promisify } = require('util');
@@ -143,10 +143,11 @@ class Executor {
             return result;
           }
           case PLATFORMS.WINDOWS: {
-            //TODO: test on Windows
-            const winShell = new ActiveXObject('WScript.Shell');
-            winShell.SendKeys(String.fromCharCode(0xad));
-            /* OR: oShell.SendKeys(Chr(&HAD)); */
+            const appRoot = app.getAppPath();
+            const nircmdPath = path.join(appRoot, 'resources', 'nircmdc.exe');
+
+            await execPromise(`${nircmdPath} mutesysvolume 2`);
+            
             return result;
           }
           case PLATFORMS.DARWIN: {
