@@ -23,7 +23,7 @@ body {
 
 .pulse {
   animation: pulse 1.2s ease infinite;
-  background: blue;
+  background: #0074D9;
 }
 
 .button-act {
@@ -32,7 +32,7 @@ body {
   align-items: center;
   z-index: 99;
   border: none;
-  background: blue;
+  background: #0074D9;
   cursor: pointer;
   outline: none;
   color: #fff;
@@ -99,6 +99,40 @@ body {
 
 #device-name {
   margin-top: 100px;
+}
+
+#settings-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#table-wrapper {
+  max-height: 350px;
+  min-height: 350px;
+  overflow: auto;
+  display:inline-block;
+}
+
+input {
+  border-top-style: hidden;
+  border-right-style: hidden;
+  border-left-style: hidden;
+  border-bottom-style: hidden;
+  outline: none;
+}
+
+input:focus {
+  border-bottom-style: groove;
+  background-color: #eee;
+}
+
+.input-phrase {
+  width: 80px;
+}
+
+.input-body {
+  width: 160px;
 }
 
 @keyframes pulse {

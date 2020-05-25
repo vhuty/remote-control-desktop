@@ -7,7 +7,18 @@
 </head>
 <body>
   <div id="app">
-    <div v-if="key" id="code-container">
+    <div v-if="['/', '/listen'].includes(route)" id="listen-container">
+      <img id="logo" src="./assets/logo.png" alt="RemoteControl" />
+      <div class="button-container">
+        <div v-if="onLine" class="pulse"></div>
+        <button :class="[onLine ? 'button-act' : 'button-no-act']" id="btn-listen" ref="btnListen" @click="listen">Listen</button>
+      </div>
+      <div id="footer">
+        <button class="btn btn-secondary" @click="options">Options</button>
+        <span id="device-name" class="badge badge-secondary">{{ $device.name }}</span>
+      </div>
+    </div>
+    <div v-else-if="route === '/access'" id="code-container">
       <span class="badge badge-pill badge-light">Copy access key:</span>
       <div class="alert alert-info access-key" role="alert">
         <a class="alert-link" id="accessKey" role="button" title="Click to copy" @click="copyAccessKey">{{ key }}</a>
@@ -16,13 +27,34 @@
       <canvas ref="qr"></canvas>
       <button type="button" class="btn btn-secondary" @click="stop">Cancel</button>
     </div>
-    <div v-else id="listen-container">
-      <img id="logo" src="./assets/logo.png" alt="RemoteControl" />
-      <div class="button-container">
-        <div v-if="onLine" class="pulse"></div>
-        <button :class="[onLine ? 'button-act' : 'button-no-act']" id="btn-listen" ref="btnListen" @click="listen">Listen</button>
+    <div v-else id="settings-container">
+      <div id="table-wrapper">
+        <table class="table w-auto">
+          <caption>Defined commands</caption>
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Phrase</th>
+              <th scope="col">Command</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="cmd in commands">
+              <th scope="row">{{cmd.id}}</th>
+              <td>
+                <input class="input-phrase" type="text" v-model="cmd.phrase">
+              </td>
+              <td>
+                <input class="input-body" type="text" v-model="cmd.body">
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <span id="device-name" class="badge badge-secondary">{{ $device.name }}</span>
+      <div class="btn-group" id="buttons-group">
+        <button type="button" class="btn btn-secondary" @click="addCommand">New</button>
+        <button type="button" class="btn btn-outline-success">Save</button>
+      </div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

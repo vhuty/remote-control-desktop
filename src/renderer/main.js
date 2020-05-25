@@ -11,9 +11,17 @@ Vue.ipc = Vue.prototype.$ipc = ipcRenderer;
 this.app = new Vue({
   el: '#app',
   data: {
+    route: '/',
     key: null,
     connection: null,
-    onLine: navigator.onLine
+    onLine: navigator.onLine,
+    commands: [
+      {
+        id: 1,
+        phrase: 'node',
+        body: 'node index.js'
+      }
+    ]
   },
   methods: {
     // For the testing purposes
@@ -37,8 +45,9 @@ this.app = new Vue({
         return alert(error);
       }
 
-      this.key = key;
+      this.navigateTo('/access');
 
+      this.key = key;
       this.$nextTick(() => {
         QRCode.toCanvas(this.$refs.qr, key, {
           width: 250,
@@ -142,6 +151,18 @@ this.app = new Vue({
       if (this.peer) {
         this.peer.destroy();
       }
+
+      this.navigateTo('/listen');
+    },
+    options() {
+      this.navigateTo('/options');
+    },
+    addCommand() {
+      this.commands.push({
+        id: this.commands.length + 1,
+        phrase: '',
+        body: ''
+      });
     },
     async copyAccessKey() {
       try {
@@ -150,6 +171,9 @@ this.app = new Vue({
         // Use dialog
         alert(error);
       }
+    },
+    navigateTo(route) {
+      this.route = route;
     }
   },
   async created() {
