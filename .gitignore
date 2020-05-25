@@ -7,7 +7,7 @@
 package-lock.json
 
 # build
-/build
+# /build
 /dist
 
 # config and temp

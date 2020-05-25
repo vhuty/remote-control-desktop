@@ -146,8 +146,12 @@ class Executor {
             const appRoot = app.getAppPath();
             const nircmdPath = path.join(appRoot, 'resources', 'nircmdc.exe');
 
-            await execPromise(`${nircmdPath} mutesysvolume 2`);
-            
+            try {
+              await execPromise(`${nircmdPath} mutesysvolume 2`);
+            } catch (err) {
+              console.error(err);
+            }
+
             return result;
           }
           case PLATFORMS.DARWIN: {
