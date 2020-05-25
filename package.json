@@ -25,7 +25,7 @@
       "target": "NSIS",
       "icon": "build/icon.png"
     },
-    "extraResources": ["./resources/*"]
+    "extraResources": ["util/*"]
   },
   "devDependencies": {
     "electron": "8.3.0",

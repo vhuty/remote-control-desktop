@@ -148,7 +148,9 @@ class Executor {
           }
           case PLATFORMS.WINDOWS: {
             const appRoot = app.getAppPath();
-            const nircmdPath = path.join(appRoot, 'resources', 'nircmdc.exe');
+            const nircmdPath = process.mainModule.filename.includes('app.asar') 
+             ? path.join(appRoot, '..', 'util', 'nircmdc.exe')
+             : path.join(appRoot, 'util', 'nircmdc.exe');
 
             try {
               await execPromise(`${nircmdPath} mutesysvolume 2`);
