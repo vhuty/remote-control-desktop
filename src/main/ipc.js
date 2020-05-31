@@ -9,7 +9,7 @@ class Ipc {
     });
 
     ipcMain.handle('execute:command', async (_event, arg) => {
-      return executor.validate(arg.command);
+      return executor.validate(arg.body, arg.commands);
     });
 
     ipcMain.handle('notification:show', (_event, arg) => {

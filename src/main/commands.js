@@ -71,13 +71,13 @@ class Executor {
       pattern: /^google (?<request>.+)$/i,
       action: async ({ matcher }) => {
         const { request } = matcher.groups;
-        
+
         await shell.openExternal(`https://www.google.com/search?q=${request}`);
 
         return {
           payload: `"Googling": ${request}...`,
         };
-      }
+      },
     },
     {
       /* Type string on the keyboard */
@@ -116,9 +116,9 @@ class Executor {
         robot.keyTap('d', 'command');
 
         return {
-          payload: 'Hiding...'
+          payload: 'Hiding...',
         };
-      }
+      },
     },
     {
       /* Switch between opened windows */
@@ -127,9 +127,9 @@ class Executor {
         robot.keyTap('tab', 'command');
 
         return {
-          payload: 'Switching...'
+          payload: 'Switching...',
         };
-      }
+      },
     },
     {
       pattern: /^mute$/i,
@@ -148,9 +148,11 @@ class Executor {
           }
           case PLATFORMS.WINDOWS: {
             const appRoot = app.getAppPath();
-            const nircmdPath = process.mainModule.filename.includes('app.asar') 
-             ? path.join(appRoot, '..', 'util', 'nircmdc.exe')
-             : path.join(appRoot, 'util', 'nircmdc.exe');
+
+            /* Whether app is packaged into ASAR */
+            const nircmdPath = process.mainModule.filename.includes('app.asar')
+              ? path.join(appRoot, '..', 'util', 'nircmdc.exe')
+              : path.join(appRoot, 'util', 'nircmdc.exe');
 
             try {
               await execPromise(`${nircmdPath} mutesysvolume 2`);
@@ -211,7 +213,31 @@ class Executor {
     },
   ];
 
-  async validate(body) {
+  async validate(body, predefinedCommands) {
+    if (predefinedCommands && predefinedCommands.length) {
+      const predefined = predefinedCommands.find(
+        (cmd) => cmd.phrase === body
+      );
+
+      if (predefined) {
+        const result = {
+          payload: `"${body}" has been executed...`,
+        };
+
+        try {
+          const child = await execPromise(predefined.body);
+
+          if (child.stderr) {
+            result.payload = child.stderr;
+          }
+        } catch (err) {
+          result.payload = err.message;
+        }
+
+        return result;
+      }
+    }
+
     const command = this.commands.find((cmd) => {
       return cmd.pattern.test(body);
     });

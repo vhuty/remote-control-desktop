@@ -15,26 +15,20 @@ this.app = new Vue({
     key: null,
     connection: null,
     onLine: navigator.onLine,
-    commands: [
-      {
-        id: 1,
-        phrase: 'node',
-        body: 'node index.js'
-      }
-    ]
+    commands: [],
   },
   methods: {
     // For the testing purposes
     async execute(command) {
-      const { error, payload } = await this.$ipc.invoke(
-        'execute:command',
-        { command }
-      );
+      const { error, payload } = await this.$ipc.invoke('execute:command', {
+        commands: this.commands,
+        body: command,
+      });
 
-      if(error) {
+      if (error) {
         return console.error(error);
       }
-      
+
       console.log(payload);
     },
     async listen() {
@@ -59,39 +53,43 @@ this.app = new Vue({
       connection.onmessage = async (event) => {
         const message = JSON.parse(event.data);
         const { source, data, status, signal } = message;
-        const controller = await this.$api.getController(source);
 
-        if (controller) {
-          if (status) {
-            this.$ipc.invoke('notification:show', {
-              message: `${controller.name} is ${status}`,
+        const { controller, error } = await this.$api.getController(source);
+
+        if (error) {
+          // Use dialog
+          return alert(error);
+        }
+
+        if (status) {
+          this.$ipc.invoke('notification:show', {
+            message: `${controller.name} is ${status}`,
+          });
+        }
+
+        if (data) {
+          const { error, payload } = await this.$ipc.invoke('execute:command', {
+            commands: this.commands,
+            body: data,
+          });
+
+          const response = {
+            payload,
+          };
+
+          if (error) {
+            await this.$ipc.invoke('notification:show', {
+              message: `${controller.name}: ${data}`,
             });
+
+            response.payload = 'Message sent';
           }
 
-          if (data) {
-            const { error, payload } = await this.$ipc.invoke(
-              'execute:command',
-              { command: data }
-            );
+          connection.send(JSON.stringify(response));
+        }
 
-            const response = {
-              payload,
-            };
-
-            if (error) {
-              await this.$ipc.invoke('notification:show', {
-                message: `${controller.name}: ${data}`,
-              });
-
-              response.payload = 'Message sent';
-            }
-
-            connection.send(JSON.stringify(response));
-          }
-
-          if (signal) {
-            this.peer.signal(signal);
-          }
+        if (signal) {
+          this.peer.signal(signal);
         }
       };
 
@@ -154,14 +152,56 @@ this.app = new Vue({
 
       this.navigateTo('/listen');
     },
-    options() {
+    home() {
+      this.navigateTo('/');
+    },
+    async cleanup() {
+      const result = {
+        success: true,
+      };
+
+      try {
+        await this.stop();
+      } catch {
+        result.success = false;
+      }
+
+      this.$ipc.invoke('cleanup', result);
+    },
+    async options() {
+      await this.loadCommands();
       this.navigateTo('/options');
     },
+    async loadCommands() {
+      const { commands, error } = await this.$api.getCommands();
+      if (error) {
+        // Use dialog
+        alert(error);
+      }
+
+      this.commands = commands.map((cmd, idx) => ({ ...cmd, index: idx + 1 }));
+    },
+    async saveCommands() {
+      const { error } = await this.$api.saveCommands(this.commands);
+      if (error) {
+        // Use dialog
+        alert(error);
+      }
+
+      this.loadCommands();
+    },
     addCommand() {
+      const commandsLength = this.commands.length;
+      const lastCommand = this.commands[commandsLength - 1];
+
+      if (lastCommand && !(lastCommand.phrase && lastCommand.body)) {
+        return;
+      }
+
       this.commands.push({
-        id: this.commands.length + 1,
+        index: commandsLength + 1,
         phrase: '',
-        body: ''
+        body: '',
       });
     },
     async copyAccessKey() {
@@ -174,7 +214,7 @@ this.app = new Vue({
     },
     navigateTo(route) {
       this.route = route;
-    }
+    },
   },
   async created() {
     if (!localStorage.registered) {
@@ -183,31 +223,17 @@ this.app = new Vue({
         localStorage.registered = true;
       }
     }
-
-    this.$ipc.on('cleanup', async () => {
-      const result = {
-        success: true,
-      };
-
-      try {
-        await this.stop();
-      } catch {
-        result.success = false;
-      }
-
-      this.$ipc.invoke('cleanup', result);
-    });
   },
   async mounted() {
     window.addEventListener('offline', () => {
-      this.$refs.btnListen.disabled = true;
+      this.onLine = false;
 
       this.$ipc.invoke('notification:show', {
         message: `Oops... Check your internet connection`,
       });
     });
     window.addEventListener('online', () => {
-      this.$refs.btnListen.disabled = false;
+      this.onLine = true;
     });
   },
 });

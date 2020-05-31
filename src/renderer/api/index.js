@@ -47,7 +47,6 @@ class Api {
     const data = await response.json();
 
     if (!response.ok) {
-
       return { error: data.message };
     }
 
@@ -76,15 +75,51 @@ class Api {
     return {};
   }
 
-  async getController(id) {
-    const response = await fetch(`${apiUrl.http}/controller/${id}/`);
+  async getCommands() {
+    const response = await fetch(
+      `${apiUrl.http}/device/${this.device.id}/commands/`
+    );
     const data = await response.json();
 
     if (!response.ok) {
       return { error: data.message };
     }
 
-    return data;
+    return { commands: data };
+  }
+
+  async saveCommands(commands) {
+    const body = {
+      data: commands,
+    };
+
+    const response = await fetch(
+      `${apiUrl.http}/device/${this.device.id}/commands/`,
+      {
+        method: 'PUT',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      return { error: message };
+    }
+
+    return {};
+  }
+
+  async getController(controllerId) {
+    const response = await fetch(`${apiUrl.http}/controller/${controllerId}/`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { error: data.message };
+    }
+
+    return { controller: data };
   }
 }
 module.exports = Api;
