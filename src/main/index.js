@@ -13,7 +13,7 @@ const renderer = `file://${path.resolve(
 app.on('ready', () => {
   const mb = menubar({
     index: renderer,
-    tray: getCustomTray(app),
+    tray: new Tray(path.resolve(__dirname, 'assets', 'icon.png')),
     browserWindow: {
       width: 370,
       height: 460,
@@ -32,25 +32,3 @@ app.on('ready', () => {
     Ipc.init(mb);
   });
 });
-
-function getCustomTray(app) {
-  const image = path.resolve(__dirname, 'assets', 'icon.png');
-  const tray = new Tray(image);
-
-  const onclose = (_item, window) => {
-    if (window) {
-      window.webContents.send('cleanup');
-    }
-  }
-
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Quit application',
-      click: onclose
-    },
-  ]);
-
-  tray.setContextMenu(contextMenu);
-
-  return tray;
-}

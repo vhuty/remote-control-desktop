@@ -152,9 +152,6 @@ this.app = new Vue({
 
       this.navigateTo('/listen');
     },
-    home() {
-      this.navigateTo('/');
-    },
     async cleanup() {
       const result = {
         success: true,

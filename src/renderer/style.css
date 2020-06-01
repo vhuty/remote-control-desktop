@@ -116,6 +116,22 @@ body {
   align-items: center;
 }
 
+.controls button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.icon-before {
+  margin-right: 5px;
+  font-size: large;
+}
+
+.icon-after {
+  margin-left: 5px;
+  font-size: large;
+}
+
 #table-wrapper {
   max-height: 350px;
   min-height: 350px;
