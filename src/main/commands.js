@@ -183,7 +183,7 @@ class Executor {
       pattern: /^(?<action>turn off|reboot|cancel)(\s+in\s+(?<timeout>\d+)\s+(?<unit>seconds?|minutes?|hours?))?$/,
       action: async ({ matcher, platform }) => {
         const {
-          groups: { action, timeout = 0, unit },
+          groups: { action, timeout = 0, unit = '' },
         } = matcher;
 
         const platformTimeout = _convertTime(timeout, unit, platform);
@@ -266,7 +266,7 @@ class Executor {
   }
 }
 
-function _convertTime(timeout = 0, unit = '', platform) {
+function _convertTime(timeout, unit, platform) {
   switch (platform) {
     case PLATFORMS.LINUX: {
       switch (true) {
