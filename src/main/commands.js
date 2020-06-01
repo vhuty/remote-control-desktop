@@ -26,8 +26,8 @@ const SYSTEM_CALLS = {
     [PLATFORMS.WINDOWS]: (timeout = 0) => `shutdown /r ${timeout}`,
   },
   CANCEL: {
-    [PLATFORMS.LINUX]: (_) => `shutdown -c`,
-    [PLATFORMS.WINDOWS]: (_) => `shutdown /a`,
+    [PLATFORMS.LINUX]: () => `shutdown -c`,
+    [PLATFORMS.WINDOWS]: () => `shutdown /a`,
   },
 };
 
@@ -180,24 +180,23 @@ class Executor {
       },
     },
     {
-      pattern: /^(?<action>turn off|reboot|cancel)(\s+in\s+(?<timeout>\d+)\s+minutes)?$/,
+      pattern: /^(?<action>turn off|reboot|cancel)(\s+in\s+(?<timeout>\d+)\s+(?<unit>seconds?|minutes?|hours?))?$/,
       action: async ({ matcher, platform }) => {
         const {
-          groups: {
-            action,
-            timeout = 0, //In minutes
-          },
+          groups: { action, timeout = 0, unit },
         } = matcher;
+
+        const platformTimeout = _convertTime(timeout, unit, platform);
 
         switch (true) {
           case /turn off/i.test(action): {
-            const call = SYSTEM_CALLS.TURN_OFF[platform](timeout);
+            const call = SYSTEM_CALLS.TURN_OFF[platform](platformTimeout);
             await execPromise(call);
 
             return { payload: 'Turning off...' };
           }
           case /reboot/i.test(action): {
-            const call = SYSTEM_CALLS.REBOOT[platform](timeout);
+            const call = SYSTEM_CALLS.REBOOT[platform](platformTimeout);
             await execPromise(call);
 
             return { payload: 'Rebooting...' };
@@ -246,7 +245,7 @@ class Executor {
           }
         }
 
-        return { payload: `"${body}" has been executed...` };
+        return { payload: `"${body}" has been executed` };
       }
     }
 
@@ -265,6 +264,31 @@ class Executor {
 
     return action({ matcher, platform });
   }
+}
+
+function _convertTime(timeout = 0, unit = '', platform) {
+  switch (platform) {
+    case PLATFORMS.LINUX: {
+      switch (true) {
+        case unit.startsWith('second'): return timeout / 60;
+        case unit.startsWith('hour'): return timeout * 60;
+      }
+      break;
+    }
+    case PLATFORMS.WINDOWS: {
+      switch (true) {
+        case unit.startsWith('minute'): return timeout * 60;
+        case unit.startsWith('hour'): return timeout * 3600;
+      }
+      break;
+    }
+    case PLATFORMS.DARWIN: {
+      //TODO: implement on Darwin
+      break;
+    }
+  }
+
+  return timeout;
 }
 
 module.exports = new Executor();
