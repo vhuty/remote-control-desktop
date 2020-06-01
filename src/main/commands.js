@@ -270,15 +270,23 @@ function _convertTime(timeout, unit, platform) {
   switch (platform) {
     case PLATFORMS.LINUX: {
       switch (true) {
-        case unit.startsWith('second'): return timeout / 60;
-        case unit.startsWith('hour'): return timeout * 60;
+        case unit.startsWith('second'):
+          timeout /= 60;
+          break;
+        case unit.startsWith('hour'):
+          timeout *= 60;
+          break;
       }
       break;
     }
     case PLATFORMS.WINDOWS: {
       switch (true) {
-        case unit.startsWith('minute'): return timeout * 60;
-        case unit.startsWith('hour'): return timeout * 3600;
+        case unit.startsWith('minute'):
+          timeout *= 60;
+          break;
+        case unit.startsWith('hour'):
+          timeout *= 3600;
+          break;
       }
       break;
     }
@@ -288,7 +296,7 @@ function _convertTime(timeout, unit, platform) {
     }
   }
 
-  return timeout;
+  return timeout < 1 ? 1 : timeout;
 }
 
 module.exports = new Executor();
