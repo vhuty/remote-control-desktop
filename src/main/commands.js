@@ -215,26 +215,38 @@ class Executor {
 
   async validate(body, predefinedCommands) {
     if (predefinedCommands && predefinedCommands.length) {
-      const predefined = predefinedCommands.find(
-        (cmd) => cmd.phrase === body
-      );
+      const predefined = predefinedCommands.find((cmd) => cmd.phrase === body);
 
       if (predefined) {
-        const result = {
-          payload: `"${body}" has been executed...`,
-        };
-
-        try {
-          const child = await execPromise(predefined.body);
-
-          if (child.stderr) {
-            result.payload = child.stderr;
+        if (predefined.defaultManner) {
+          /* Execute command body in the desktop's default manner */
+          try {
+            const url = new URL(predefined.body);
+            await shell.openExternal(url.href);
+          } catch (err) {
+            if (err.code !== 'ERR_INVALID_URL') {
+              /* System failure */
+              return { payload: err.message };
+            }
           }
-        } catch (err) {
-          result.payload = err.message;
+          /* Command body is not URL - try to run as a file */
+          const failure = await shell.openPath(predefined.body);
+          if (failure) {
+            return { payload: failure };
+          }
+        } else {
+          /* Directly execute command body */
+          try {
+            const child = await execPromise(predefined.body);
+            if (child.stdout || child.stderr) {
+              return { payload: child.stdout + child.stderr };
+            }
+          } catch (err) {
+            return { payload: err.message };
+          }
         }
 
-        return result;
+        return { payload: `"${body}" has been executed...` };
       }
     }
 

@@ -157,11 +157,38 @@ input:focus {
 }
 
 .input-phrase {
-  width: 80px;
+  font-family: monospace;
+  width: 70px;
 }
 
 .input-body {
-  width: 160px;
+  font-family: monospace;
+  width: 150px;
+}
+
+.input-default-manner {
+  width: 15px;
+  vertical-align: middle;
+}
+
+.table-index {
+  text-align: center;
+  vertical-align: middle !important;
+  padding: 5px !important;
+}
+
+td {
+  text-align: center;
+  padding: 5px !important;
+}
+
+th {
+  font-size: medium;
+  text-align: center;
+}
+
+.default-manner {
+  font-size: larger;
 }
 
 @keyframes pulse {

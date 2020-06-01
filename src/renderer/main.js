@@ -167,6 +167,7 @@ this.app = new Vue({
     },
     async options() {
       await this.loadCommands();
+
       this.navigateTo('/options');
     },
     async loadCommands() {
@@ -176,7 +177,9 @@ this.app = new Vue({
         alert(error);
       }
 
-      this.commands = commands.map((cmd, idx) => ({ ...cmd, index: idx + 1 }));
+      this.commands = commands.length
+        ? commands.map((cmd, idx) => ({ ...cmd, index: idx + 1 }))
+        : [{ index: 1, phrase: '', body: '', defaultManner: false }];
     },
     async saveCommands() {
       const { error } = await this.$api.saveCommands(this.commands);

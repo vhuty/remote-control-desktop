@@ -22,7 +22,7 @@
           </svg>
           Options
         </button>
-        <button class="btn btn-secondary" @click="cleanup">
+        <button class="btn btn-outline-danger" @click="cleanup">
           Exit
           <svg class="bi bi-power icon-after" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" d="M5.578 4.437a5 5 0 1 0 4.922.044l.5-.866a6 6 0 1 1-5.908-.053l.486.875z"/>
@@ -52,24 +52,40 @@
     </div>
     <div v-else id="settings-container">
       <div id="table-wrapper">
-        <table class="table" id="commands-table">
+        <table class="table table-sm" id="commands-table">
           <caption>Defined commands</caption>
           <thead class="thead-dark">
             <tr>
               <th scope="col">#</th>
               <th scope="col">Phrase</th>
               <th scope="col">Command</th>
-              <th scope="col">File, URL etc.</th>
+              <th scope="col" class="default-manner">
+                <span title="If command is a file (directory) or URL address etc. it will be opened in system's default manner (in browser, or file explorer) depending on type">
+                  <svg 
+                    class="bi bi-question-circle-fill" 
+                    width="1em" 
+                    height="1em" 
+                    viewBox="0 0 16 16" 
+                    fill="currentColor" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.57 6.033H5.25C5.22 4.147 6.68 3.5 8.006 3.5c1.397 0 2.673.73 2.673 2.24 0 1.08-.635 1.594-1.244 2.057-.737.559-1.01.768-1.01 1.486v.355H7.117l-.007-.463c-.038-.927.495-1.498 1.168-1.987.59-.444.965-.736.965-1.371 0-.825-.628-1.168-1.314-1.168-.901 0-1.358.603-1.358 1.384zm1.251 6.443c-.584 0-1.009-.394-1.009-.927 0-.552.425-.94 1.01-.94.609 0 1.028.388 1.028.94 0 .533-.42.927-1.029.927z"/>
+                  </svg>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="cmd in commands">
-              <th scope="row">{{ cmd.index }}</th>
+              <th class="table-index" scope="row">{{ cmd.index }}</th>
               <td>
                 <input class="input-phrase" type="text" v-model="cmd.phrase">
               </td>
               <td>
                 <input class="input-body" type="text" v-model="cmd.body">
+              </td>
+              <td>
+                <input class="input-default-manner" type="checkbox" v-model="cmd.defaultManner">
               </td>
             </tr>
           </tbody>
@@ -85,7 +101,7 @@
           Back
         </button>
         <div class="btn-group" id="buttons-group">
-          <button type="button" class="btn btn-secondary" @click="addCommand">
+          <button type="button" class="btn btn-outline-primary" @click="addCommand">
             <svg class="bi bi-plus-circle icon-before" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
               <path fill-rule="evenodd" d="M7.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8z"/>
