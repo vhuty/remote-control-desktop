@@ -141,7 +141,7 @@ class Executor {
             try {
               await execPromise('amixer -q -D pulse sset Master toggle');
             } catch (err) {
-              console.error(err);
+              return { payload: err.message };
             }
 
             return result;
@@ -157,7 +157,7 @@ class Executor {
             try {
               await execPromise(`${nircmdPath} mutesysvolume 2`);
             } catch (err) {
-              console.error(err);
+              return { payload: err.message };
             }
 
             return result;
@@ -173,8 +173,34 @@ class Executor {
     {
       /* Log out */
       pattern: /^log ?out$/i,
-      action: () => {
-        robot.keyTap('l', 'command');
+      action: async ({ platform }) => {
+        let command;
+
+        switch (platform) {
+          case PLATFORMS.LINUX: {
+            command = 'xdg-screensaver lock';
+
+            break;
+          }
+          case PLATFORMS.WINDOWS: {
+            command = 'rundll32.exe user32.dll,LockWorkStation';
+
+            break;
+          }
+          case PLATFORMS.DARWIN: {
+            //TODO: implement on Darwin
+            break;
+          }
+        }
+
+        try {
+          const { stdout, stderr } = await execPromise(command);
+          if (stdout || stderr) {
+            return { payload: stdout + stderr };
+          }
+        } catch (err) {
+          return { payload: err.message };
+        }
 
         return { payload: 'Logging out...' };
       },
@@ -214,7 +240,9 @@ class Executor {
 
   async validate(body, predefinedCommands) {
     if (predefinedCommands && predefinedCommands.length) {
-      const predefined = predefinedCommands.find((cmd) => cmd.phrase === body);
+      const predefined = predefinedCommands.find(
+        (cmd) => cmd.phrase.toLowerCase() === body.toLowerCase()
+      );
 
       if (predefined) {
         if (predefined.defaultManner) {
@@ -236,9 +264,9 @@ class Executor {
         } else {
           /* Directly execute command body */
           try {
-            const child = await execPromise(predefined.body);
-            if (child.stdout || child.stderr) {
-              return { payload: child.stdout + child.stderr };
+            const { stdout, stderr } = await execPromise(predefined.body);
+            if (stdout || stderr) {
+              return { payload: stdout + stderr };
             }
           } catch (err) {
             return { payload: err.message };
@@ -250,7 +278,7 @@ class Executor {
     }
 
     const command = this.commands.find((cmd) => {
-      return cmd.pattern.test(body);
+      return cmd.pattern.test(body.toLowerCase());
     });
 
     if (!command) {
