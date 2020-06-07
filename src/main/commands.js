@@ -132,41 +132,49 @@ class Executor {
       },
     },
     {
-      pattern: /^mute$/i,
-      action: async ({ platform }) => {
-        const result = { payload: 'Muting...' };
+      pattern: /^(un)?mute$/i,
+      action: async ({ platform, matcher }) => {
+        const [, unmute] = matcher;
+        const result = { payload: unmute ? 'Unmuting...' : 'Muting...' };
 
-        switch (platform) {
-          case PLATFORMS.LINUX: {
-            try {
-              await execPromise('amixer -q -D pulse sset Master toggle');
-            } catch (err) {
-              return { payload: err.message };
+        try {
+          switch (platform) {
+            case PLATFORMS.LINUX: {
+              const channels = ['Master', 'Headphone', 'Speaker'];
+
+              const commands = channels.map(
+                (channel) =>
+                  `amixer set ${channel} ${unmute ? 'unmute' : 'mute'}`
+              );
+
+              await execPromise(commands.join('&'));
+
+              return result;
             }
+            case PLATFORMS.WINDOWS: {
+              const appRoot = app.getAppPath();
 
-            return result;
-          }
-          case PLATFORMS.WINDOWS: {
-            const appRoot = app.getAppPath();
+              /* Whether app is packaged into ASAR */
+              const nircmdPath = process.mainModule.filename.includes(
+                'app.asar'
+              )
+                ? path.join(appRoot, '..', 'util', 'nircmdc.exe')
+                : path.join(appRoot, 'util', 'nircmdc.exe');
 
-            /* Whether app is packaged into ASAR */
-            const nircmdPath = process.mainModule.filename.includes('app.asar')
-              ? path.join(appRoot, '..', 'util', 'nircmdc.exe')
-              : path.join(appRoot, 'util', 'nircmdc.exe');
+              await execPromise(
+                `${nircmdPath} mutesysvolume ${unmute ? 0 : 1}`
+              );
 
-            try {
-              await execPromise(`${nircmdPath} mutesysvolume 2`);
-            } catch (err) {
-              return { payload: err.message };
+              return result;
             }
+            case PLATFORMS.DARWIN: {
+              //TODO: implement on Darwin
 
-            return result;
+              return {};
+            }
           }
-          case PLATFORMS.DARWIN: {
-            //TODO: implement on Darwin
-
-            return {};
-          }
+        } catch (err) {
+          return { payload: err.message };
         }
       },
     },
