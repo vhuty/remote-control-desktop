@@ -104,7 +104,7 @@ class Executor {
     {
       /* Close current window */
       pattern: /^close$/i,
-      action: () => {
+      action: async () => {
         robot.keyTap('f4', 'alt');
 
         return { payload: 'Closing...' };
@@ -112,7 +112,7 @@ class Executor {
     },
     {
       pattern: /^toggle$/i,
-      action: () => {
+      action: async () => {
         robot.keyTap('d', 'command');
 
         return {
@@ -123,7 +123,7 @@ class Executor {
     {
       /* Switch between opened windows */
       pattern: /^switch$/i,
-      action: () => {
+      action: async () => {
         robot.keyTap('tab', 'command');
 
         return {
@@ -242,6 +242,26 @@ class Executor {
             return { payload: 'Aborting...' };
           }
         }
+      },
+    },
+    {
+      pattern: /(?<key>.+)/,
+      action: async ({ matcher }) => {
+        const { key } = matcher.groups;
+        const sanitized = key
+          .toLowerCase()
+          .replace(/\s+/, '')
+          .replace('windows', 'command');
+
+        try {
+          robot.keyTap(sanitized);
+        } catch (err) {
+          return {
+            error: err.message,
+          };
+        }
+
+        return { payload: `"${key}" - pressed` };
       },
     },
   ];
