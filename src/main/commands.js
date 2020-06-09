@@ -132,6 +132,14 @@ class Executor {
       },
     },
     {
+      pattern: /^mute$/i,
+      action: async () => {
+        robot.keyTap('audio_mute');
+
+        return { payload: 'Muting...' };
+      },
+    },
+    {
       pattern: /^louder$/i,
       action: async () => {
         robot.keyTap('audio_vol_up');
