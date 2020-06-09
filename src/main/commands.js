@@ -262,23 +262,24 @@ class Executor {
       },
     },
     {
-      pattern: /(?<key>.+)/,
+      pattern: /(?<lexemes>.+)/,
       action: async ({ matcher }) => {
-        const { key } = matcher.groups;
-        const sanitized = key
+        const keys = matcher.groups.lexemes
           .toLowerCase()
-          .replace(/\s+/, '')
-          .replace('windows', 'command');
+          .replace('windows', 'command')
+          .split(/\s+/);
+
+        const [key, ...modifiers] = keys.reverse();
 
         try {
-          robot.keyTap(sanitized);
+          robot.keyTap(key, modifiers);
         } catch (err) {
           return {
             error: err.message,
           };
         }
 
-        return { payload: `"${key}" - pressed` };
+        return { payload: `"${keys.join('", "')}" - pressed` };
       },
     },
   ];
