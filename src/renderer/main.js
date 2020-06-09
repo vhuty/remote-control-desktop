@@ -125,7 +125,7 @@ this.app = new Vue({
 
         this.peer.on('error', (err) => {
           /* App has been closed by user */
-          if (err.code === 'ERR_CONNECTION_FAILURE') {
+          if (['ERR_CONNECTION_FAILURE', 0].includes(err.code)) {
             return;
           }
 

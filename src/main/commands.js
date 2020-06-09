@@ -132,50 +132,59 @@ class Executor {
       },
     },
     {
-      pattern: /^(un)?mute$/i,
-      action: async ({ platform, matcher }) => {
-        const [, unmute] = matcher;
-        const result = { payload: unmute ? 'Unmuting...' : 'Muting...' };
+      pattern: /^louder$/i,
+      action: async () => {
+        robot.keyTap('audio_vol_up');
 
-        try {
-          switch (platform) {
-            case PLATFORMS.LINUX: {
-              const channels = ['Master', 'Headphone', 'Speaker'];
+        return { payload: 'Making volume louder...' };
+      },
+    },
+    {
+      pattern: /^quieter$/i,
+      action: async () => {
+        robot.keyTap('audio_vol_down');
 
-              const commands = channels.map(
-                (channel) =>
-                  `amixer set ${channel} ${unmute ? 'unmute' : 'mute'}`
-              );
+        return { payload: 'Making volume quieter...' };
+      },
+    },
+    {
+      pattern: /^play$/i,
+      action: async () => {
+        robot.keyTap('audio_play');
 
-              await execPromise(commands.join('&'));
+        return { payload: 'Playing...' };
+      },
+    },
+    {
+      pattern: /^pause$/i,
+      action: async () => {
+        robot.keyTap('audio_pause');
 
-              return result;
-            }
-            case PLATFORMS.WINDOWS: {
-              const appRoot = app.getAppPath();
+        return { payload: 'Paused' };
+      },
+    },
+    {
+      pattern: /^stop$/i,
+      action: async () => {
+        robot.keyTap('audio_stop');
 
-              /* Whether app is packaged into ASAR */
-              const nircmdPath = process.mainModule.filename.includes(
-                'app.asar'
-              )
-                ? path.join(appRoot, '..', 'util', 'nircmdc.exe')
-                : path.join(appRoot, 'util', 'nircmdc.exe');
+        return { payload: 'Stopped' };
+      },
+    },
+    {
+      pattern: /^next$/i,
+      action: async () => {
+        robot.keyTap('audio_next');
 
-              await execPromise(
-                `${nircmdPath} mutesysvolume ${unmute ? 0 : 1}`
-              );
+        return { payload: 'Playing next...' };
+      },
+    },
+    {
+      pattern: /^previous$/i,
+      action: async () => {
+        robot.keyTap('audio_prev');
 
-              return result;
-            }
-            case PLATFORMS.DARWIN: {
-              //TODO: implement on Darwin
-
-              return {};
-            }
-          }
-        } catch (err) {
-          return { payload: err.message };
-        }
+        return { payload: 'Playing previous...' };
       },
     },
     {
