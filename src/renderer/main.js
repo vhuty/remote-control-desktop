@@ -74,7 +74,8 @@ this.app = new Vue({
           });
 
           const response = {
-            payload,
+            source: this.$device.id,
+            data: payload,
           };
 
           if (error) {
@@ -82,7 +83,7 @@ this.app = new Vue({
               message: `${controller.name}: ${data}`,
             });
 
-            response.payload = 'Message sent';
+            response.data = 'Message sent';
           }
 
           connection.send(JSON.stringify(response));
