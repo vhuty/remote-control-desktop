@@ -43,7 +43,7 @@ class Executor {
 
         const filename = alias
           ? `${name}.txt`
-          : `Note for ${new Date().toDateString()}.txt`;
+          : `Note for ${new Date().toLocaleString()}.txt`;
 
         /* Default path to storing notes - Desktop directory */
         const filepath = path.join(os.homedir(), 'Desktop', filename);
