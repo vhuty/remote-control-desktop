@@ -13,7 +13,7 @@ const renderer = `file://${path.resolve(
 app.on('ready', () => {
   const mb = menubar({
     index: renderer,
-    tray: new Tray(path.resolve(__dirname, 'assets', 'icon.png')),
+    tray: getCustomTray(),
     browserWindow: {
       width: 370,
       height: 460,
@@ -32,3 +32,12 @@ app.on('ready', () => {
     Ipc.init(mb);
   });
 });
+
+function getCustomTray() {
+  const image = path.resolve(__dirname, 'assets', 'icon.png');
+  const tray = new Tray(image);
+
+  tray.setContextMenu(new Menu());
+
+  return tray;
+}
