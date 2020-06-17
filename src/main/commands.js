@@ -23,7 +23,7 @@ const SYSTEM_CALLS = {
   },
   REBOOT: {
     [PLATFORMS.LINUX]: (timeout = 0) => `shutdown -r ${timeout}`,
-    [PLATFORMS.WINDOWS]: (timeout = 0) => `shutdown /r ${timeout}`,
+    [PLATFORMS.WINDOWS]: (timeout = 0) => `shutdown /r /t ${timeout}`,
   },
   CANCEL: {
     [PLATFORMS.LINUX]: () => `shutdown -c`,
